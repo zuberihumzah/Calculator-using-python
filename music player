@@ -1,0 +1,267 @@
+# we are creating a music player
+from tkinter import *
+import numpy as np
+import random
+from PIL import Image
+from PIL import ImageTk
+from pygame import mixer
+import os
+mixer.init()
+
+root=Tk()
+
+#lets configure the GUI
+root.config(bg="black")
+root.geometry("500x500")
+root.minsize(500,500)
+root.maxsize(500,500)
+
+#lets set the title and the icon of the GUI also lets add the label with our name
+root.title("Music Player")
+humzah=Label(text="MADE BY ZUBERI HUMZAH",font="timesnewroman 20 bold italic",bg="white",fg="black",borderwidth=5,relief=GROOVE)
+humzah.pack(fill=X)
+root.wm_iconbitmap("1.ico")
+
+#lets import songs from the folder
+songs = os.listdir("./songs")
+
+song_list = []
+
+for song in songs:
+    file_path = "./songs/" + song
+    song_list.append(file_path)
+
+random_song= random.choice(song_list)
+get_song_index = song_list.index(random_song)
+
+#lets import all the pictures required
+player_pic=ImageTk.PhotoImage(Image.open("1.jpg"))
+start_pic=ImageTk.PhotoImage(Image.open("2.png"))
+play_pic=ImageTk.PhotoImage(Image.open("3.png"))
+next_pic=ImageTk.PhotoImage(Image.open("4.jpg"))
+prev_pic=ImageTk.PhotoImage(Image.open("5.jpg"))
+stop_pic=ImageTk.PhotoImage(Image.open("6.png"))
+sound_pic=ImageTk.PhotoImage(Image.open("7.png"))
+mute_pic=ImageTk.PhotoImage(Image.open("8.png"))
+
+#lets define the function we will need for the player
+
+#lets define the icrease and decrease function for changing the songs
+def increase():
+    global get_song_index
+    
+    if get_song_index == len(song_list) - 1:
+        get_song_index = 0
+    else:
+        get_song_index += 1
+    
+    return get_song_index
+        
+def decrease():
+    global get_song_index
+    
+    if get_song_index == 0:
+        return get_song_index == len(song_list) - 1
+    else:
+        get_song_index -= 1
+        return get_song_index
+
+#lets define fuctions for the music pause and play
+def continue_music(event):
+    mixer.music.unpause()
+    b_p.configure(image=stop_pic)
+    b_p.bind("<Button-1>",stop_music)
+    
+def stop_music(event):
+    mixer.music.pause()
+    b_p.configure(image=play_pic)
+    b_p.bind("<Button-1>",continue_music)
+    
+#lets define the function for next play and prev buttons
+def play_prev_music(event):
+    curr_song = song_list[decrease()]
+    song_name = curr_song[8:]
+    mixer.music.load(curr_song)
+    mixer.music.play()
+    l_n.configure(text=song_name)
+    b_p.configure(image=stop_pic)
+    b_p.bind("<Button-1>",stop_music)
+    
+def play_music(event):
+    song_name = random_song[8:]
+    mixer.music.load(random_song)
+    mixer.music.play()
+    l_n.configure(text=song_name)
+    b_p.configure(image=stop_pic)
+    b_p.bind("<Button-1>",stop_music)
+
+def play_next_music(event):
+    curr_song = song_list[increase()]
+    song_name = curr_song[8:]
+    mixer.music.load(curr_song)
+    mixer.music.play()
+    l_n.configure(text=song_name)
+    b_p.configure(image=stop_pic)
+    b_p.bind("<Button-1>",stop_music)
+
+#lets define the function for volume and also for mute and unmute
+def volume(vol):
+    if int(vol) > 0:
+        b_m.configure(image=sound_pic)
+        b_m.bind("<Button-1>",mute)
+    else:
+        b_m.configure(image=mute_pic)
+        b_m.bind("<Button-1>",unmute)
+    volume=int(vol)/100
+    mixer.music.set_volume(volume)
+
+def unmute(event):
+    s.set(25)
+    b_m.configure(image=sound_pic)
+    b_m.bind("<Button-1>",mute)
+      
+def mute(event):
+    s.set(0)
+    b_m.configure(image=mute_pic)
+    b_m.bind("<Button-1>",unmute)
+
+#lets define the functions requied in searching the songs
+
+#lets define this function to keep on updating the list
+def update(data):
+    my_list.delete(0,END)
+    for item in data:
+        my_list.insert(END,item)
+
+#lets define this function to fill the entry widget on selection
+def fill(event):
+    global random_song
+    selected_item_index = my_list.curselection()
+    if selected_item_index:
+        selected_item = my_list.get(selected_item_index[0])
+        e.delete(0, END)
+        e.insert(0, selected_item)
+        random_song = e.get()
+        play()
+
+#lets define this function for the checking of the typed input in the entry widget
+def check(event):
+    typed = e.get().lower()
+    if typed == "":
+        data = song_list
+    else:
+        data = [item for item in song_list if typed in item.lower()]
+    update(data)    
+
+#lets define the search function
+def search():
+    global my_list
+    global e
+    for widget in root.winfo_children():
+        widget.destroy()
+        
+    f=Frame(root,bg="black")
+    f.pack(padx=10,pady=10)
+
+    l=Label(f,text="Start searching",font="timesnewroman 20 bold italic")
+    l.pack(padx=10,pady=10)
+    
+    e=Entry(f,font="timesnewroman 20 bold italic")
+    e.pack(padx=10,pady=10)
+    
+    my_list=Listbox(f,width=50)
+    my_list.pack(padx=10,pady=10)
+    
+    update(song_list)
+    
+    my_list.bind('<<ListboxSelect>>',fill)
+    e.bind("<KeyRelease>",check)
+        
+#lets define the play function
+def play():
+    global b_p
+    global b_m
+    global s
+    global l_n
+    
+#as we are going play the songs we need a clear space here so lets first clear the window from all widgets
+    for widget in root.winfo_children():
+        widget.destroy()
+
+#now lets create the player
+
+#lets make a menu for the player
+    my_menu=Menu(root)
+    my_menu.add_command(label="Search Songs", command=search)
+    my_menu.add_command(label="Exit", command=exit)
+    root.configure(menu=my_menu)
+
+#lets first create the upper frame and fill it with volume scale mute button and the player image
+    f=Frame(root,bg="black")
+    f.pack(padx=10,pady=10)
+    
+    s=Scale(f,from_=0,to=100,bg="white",fg="grey",length=300,orient=HORIZONTAL,command=volume)
+    s.pack(side=RIGHT,padx=10,pady=10)
+    s.set(25)
+    
+    b_m=Button(f,image=sound_pic)
+    b_m.pack(side=RIGHT,padx=10,pady=10)
+    b_m.bind("<Button-1>",mute)
+    
+    f=Frame(root,bg="black")
+    f.pack(padx=10,pady=10)
+    
+    l=Label(f,image=player_pic)
+    l.pack(side=LEFT,padx=10,pady=10)
+    
+    l_n=Label(text="CLICK TO PLAY",font="timesnewroman 20 bold italic",bg="white",fg="black")
+    l_n.pack(padx=10,pady=10)
+    
+#now lets create the lower frame and fill it with buttons
+
+    f=Frame(root,bg="black")
+    f.pack(side=BOTTOM,padx=30,pady=20)
+       
+    b=Button(f,image=prev_pic)
+    b.pack(side=LEFT,padx=20,pady=10)
+    b.bind("<Button-1>",play_prev_music)
+    
+    b_p=Button(f,image=play_pic)
+    b_p.pack(side=LEFT,padx=20,pady=10)
+    b_p.bind("<Button-1>",play_music)
+    
+    b=Button(f,image=next_pic)
+    b.pack(side=LEFT,padx=20,pady=10)
+    b.bind("<Button-1>",play_next_music)
+    
+
+#lets define the click function for the front page
+def click(event):
+    global text
+    text=event.widget.cget("text")
+   
+    if text=="PLAY":
+        play()
+    else:
+        root.destroy()
+    
+#lets create the starting page
+f=Frame(root,bg="black")
+f.pack(side=BOTTOM,padx=50,pady=20,fill=X)
+
+b= Button(f,text="PLAY",fg="white",bg="red",font="timesnewroman 30 bold italic")
+b.pack(side=LEFT,padx=30,pady=10)
+b.bind("<Button-1>",click)
+
+b= Button(f,text="EXIT",fg="white",bg="red",font="timesnewroman 30 bold italic")
+b.pack(side=LEFT,padx=30,pady=10)
+b.bind("<Button-1>",click)
+
+f=Frame(root,bg="black")
+f.pack(side=TOP,padx=0,pady=40,fill=X)
+
+l=Label(f,image=start_pic)
+l.pack(side=TOP,padx=10,pady=10)
+
+#lets finish the program
+root.mainloop()
