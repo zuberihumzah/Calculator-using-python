@@ -1,0 +1,143 @@
+# we are creating a game of rock, paper and scissor
+from tkinter import *
+from PIL import Image
+from PIL import ImageTk
+import numpy as np
+
+
+root=Tk()
+root.config(bg="black")
+#lets fix the size of the GUI
+root.geometry("600x600")
+
+#lets set the title and the icon of the GUI also lets add the label with our name
+root.title("ROCK PAPER SCISSOR")
+humzah=Label(text="MADE BY ZUBERI HUMZAH",font="timesnewroman 30 bold italic",bg="white",fg="black",borderwidth=5,relief=GROOVE)
+humzah.pack(fill=X)
+root.wm_iconbitmap("1.ico")
+
+#now lets import the pictures that we will use for the rock paper and scissor
+scissor_u=ImageTk.PhotoImage(Image.open("scissor.png"))
+rock_u=ImageTk.PhotoImage(Image.open("rock.png"))
+paper_u=ImageTk.PhotoImage(Image.open("paper.jpeg"))
+scissor_c=ImageTk.PhotoImage(Image.open("scissor1.png"))
+rock_c=ImageTk.PhotoImage(Image.open("rock1.png"))
+paper_c=ImageTk.PhotoImage(Image.open("paper1.jpeg"))
+
+#lets define a fuction for updation of scores
+def update_score(p, c):
+    if p == c:
+        pass
+    elif (p == "rock" and c == "scissor") or (p == "paper" and c == "rock") or (p == "scissor" and c == "paper"):
+        update_player()
+    else:
+        update_comp()
+ 
+#lets define a function for the updation of player scores
+def update_player():
+    a=0
+    b=""
+    score = int(player_score_label.cget("text"))
+    score += 1
+    player_score_label.config(text=str(score))
+    if score == 3:
+        b="YOU WIN!!!"
+        win.config(text=str(b))
+        player_score_label.config(text=a)
+        computer_score_label.config(text=a)
+
+#lets define a function for the updation of computer scores
+def update_comp():
+    a=0
+    b=""
+    score = int(computer_score_label.cget("text"))
+    score += 1
+    computer_score_label.config(text=str(score))
+    if score == 3:
+        b="YOU LOSE!!!"
+        win.config(text=str(b))
+        player_score_label.config(text=a)
+        computer_score_label.config(text=a)
+    
+#lets define what will happen if we click any of the buttons
+def click(event):
+    global text
+    global comp_choise
+    win.config(text="Lets play!!!")
+    text=event.widget.cget("text")
+    
+    if (text=="rock"):
+        b_u.configure(image=rock_u)     
+    elif (text=="paper"):
+        b_u.configure(image=paper_u)  
+    else:
+        b_u.configure(image=scissor_u)  
+     
+    comp_choise = ""
+    a=np.random.randint(0,3) 
+    if a==0:
+        comp_choise="scissor"
+        b_c.configure(image=scissor_c)
+    elif a==1:
+        comp_choise="rock"
+        b_c.configure(image=rock_c)
+    else:
+        comp_choise="paper"
+        b_c.configure(image=paper_c)
+    
+    update_score(text,comp_choise)
+
+
+# lets create frame for buttons
+f=Frame(root,bg="black")
+f.pack(side=BOTTOM,padx=10,pady=10,fill=Y)
+
+#lets create buttons for rock paper and scissor
+b=Button(f,text="rock",font="lucida 25 bold",bg="white",fg="black")
+b.pack(side=LEFT,padx=10,pady=10)
+b.bind("<Button-1>",click)
+
+b=Button(f,text="paper",font="lucida 25 bold",bg="white",fg="black")
+b.pack(side=LEFT,padx=10,pady=10)
+b.bind("<Button-1>",click)
+
+b=Button(f,text="scissor",font="lucida 25 bold",bg="white",fg="black")
+b.pack(side=LEFT,padx=10,pady=10)
+b.bind("<Button-1>",click)
+
+# lets create frames for pictures and the score widget
+f1=Frame(root,bg="black")
+f1.pack(side=RIGHT,padx=0,pady=40,fill=Y)
+
+f2=Frame(root,bg="black")
+f2.pack(side=LEFT,padx=0,pady=40,fill=Y)
+
+
+b_u=Label(f1,image=rock_u)
+b_u.pack(side=TOP)
+
+b_c=Label(f2,image=rock_c)
+b_c.pack(side=TOP)
+
+player_score_label = Label(f1, text=0, font="timesnewroman 50 bold", bg="red", fg="white")
+player_score_label.pack(side=TOP, padx=10, pady=10)
+
+computer_score_label = Label(f2, text=0, font="timesnewroman 50 bold", bg="red", fg="white")
+computer_score_label.pack(side=TOP, padx=10, pady=10)
+
+#lets add the names of the windows they are for i.e- player or computer
+player=Label(f1,text="PLAYER",font="timesnewroman 20 bold",bg="black",fg="white").pack(side=TOP,padx=10,pady=0)
+computer=Label(f2,text="COMPUTER",font="timesnewroman 20 bold",bg="black",fg="white").pack(side=TOP,padx=10,pady=0)
+
+#lets also add a VS sign in between the player and computer window
+l=Label(text="VS",font="timesnewroman 30 italic",bg="white",fg="black")
+l.pack(padx=30,pady=100)
+
+#lets add a winning message for the winner
+f3=Frame(root,bg="grey")
+f3.pack(side=TOP,padx=0,pady=50)
+
+win=Label(f3,text="Lets play!!!",font="timesnewroman 20 bold", bg="red", fg="white")
+win.pack(padx=10,pady=10)
+
+root.mainloop()
